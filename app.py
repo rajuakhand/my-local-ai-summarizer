@@ -1,4 +1,4 @@
-```python
+
 import io
 import streamlit as st
 from langchain_ollama import ChatOllama
@@ -392,4 +392,4 @@ st.markdown(
     "<center>Built with ❤️ using Python, Streamlit, LangChain and Ollama</center>",
     unsafe_allow_html=True,
 )
-```
+
