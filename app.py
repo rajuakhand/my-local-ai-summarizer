@@ -6,13 +6,14 @@ from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 
 Optional PDF support
-
 try:
-from pypdf import PdfReader
-PDF_AVAILABLE = True
+    from pypdf import PdfReader
+# Optional PDF support
+try:
+    from pypdf import PdfReader
+    PDF_AVAILABLE = True
 except ImportError:
-PDF_AVAILABLE = False
-
+    PDF_AVAILABLE = False
 --------------------------------------------------
 
 Page configuration
