@@ -565,7 +565,7 @@ if uploaded_file is not None:
 
     except Exception as error:
         st.error(f"File processing failed: {error}")
-
+        
 if st.session_state.pop("clear_input_on_next_run", False):
     st.session_state.input_text = ""
     st.session_state.summary = ""
@@ -600,8 +600,7 @@ if st.session_state.pop("clear_input_on_next_run", False):
             "🗑️ Clear Input",
             use_container_width=True,
         )
-
-   if clear_clicked:
+if clear_clicked:
     st.session_state.input_text = ""
     st.session_state.summary = ""
     st.session_state.clear_input_on_next_run = True
