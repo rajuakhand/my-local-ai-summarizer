@@ -553,28 +553,27 @@ with left_col:
         help="Scanned PDFs without a text layer may need OCR.",
     )
 
-    if uploaded_file is not None:
-        try:
-            uploaded_text = extract_uploaded_text(uploaded_file)
+if uploaded_file is not None:
+    try:
+        uploaded_text = extract_uploaded_text(uploaded_file)
 
-            if uploaded_text:
-                st.session_state.input_text = uploaded_text
-                st.success(
-                    f"Loaded {uploaded_file.name}"
-                )
-            else:
-                st.warning(
-                    "No readable text was found in this file."
-                )
+        if uploaded_text:
+            st.session_state.input_text = uploaded_text
+            st.success(f"Loaded {uploaded_file.name}")
+        else:
+            st.warning("No readable text was found in this file.")
 
-        except Exception as error:
-            st.error(f"File processing failed: {error}")
-    if st.session_state.pop("clear_input_on_next_run", False):
+    except Exception as error:
+        st.error(f"File processing failed: {error}")
+
+if st.session_state.pop("clear_input_on_next_run", False):
     st.session_state.input_text = ""
-    input_text = st.text_area(
-        "Paste or edit your text",
-        key="input_text",
-        height=300,
+    st.session_state.summary = ""
+
+input_text = st.text_area(
+    "Paste or edit your text",
+    key="input_text",
+    height=300,
         placeholder=(
             "Paste an article, notes, essay, or document here..."
         ),
