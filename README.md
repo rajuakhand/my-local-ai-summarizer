@@ -57,6 +57,11 @@ python -m streamlit run app.py
 ```
 
 Open `http://localhost:8501` in your browser.
+## 📸 Application Screenshot
+
+![Local AI Text Summarizer](screenshots/app-demo.png)
+
+Try the live application: [Open AI Summarizer](https://my-local-ai-summarizer-cetbdvs2ozk2mnvubxzeyj.streamlit.app/)
 
 ## 🌐 Live Demo
 
