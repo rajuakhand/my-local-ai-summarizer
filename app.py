@@ -5,9 +5,6 @@ import streamlit as st
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 
-Optional PDF support
-try:
-    from pypdf import PdfReader
 # Optional PDF support
 try:
     from pypdf import PdfReader
