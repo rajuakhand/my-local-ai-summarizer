@@ -570,13 +570,11 @@ if st.session_state.pop("clear_input_on_next_run", False):
     st.session_state.input_text = ""
     st.session_state.summary = ""
 
-input_text = st.text_area(
-    "Paste or edit your text",
-    key="input_text",
-    height=300,
-        placeholder=(
-            "Paste an article, notes, essay, or document here..."
-        ),
+    input_text = st.text_area(
+     "Paste or edit your text",
+     key="input_text",
+     height=300,
+     placeholder="Paste an article, notes, or any text here...",
     )
 
     words = len(input_text.split())
