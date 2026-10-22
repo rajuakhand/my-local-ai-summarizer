@@ -1,15 +1,20 @@
-# 🧠 Local AI Text Summarizer
+# 🤖 Local AI Text Summarizer
 
-A simple AI-powered text summarizer built with Python, Streamlit, LangChain, and Ollama.
+An AI-powered text summarization web app built with Python, Streamlit, LangChain, and Ollama.
+
+**Turn long text into concise, easy-to-understand summaries.**
+
+[🚀 Live Demo](https://my-local-ai-summarizer-cetbdvs2ozk2mnvubxzeyj.streamlit.app/) · [💻 Source Code](https://github.com/rajuakhand/my-local-ai-summarizer)
 
 ## ✨ Features
 
-- Summarizes text into three short sentences
-- Runs locally using the Ollama language model
-- Simple web interface powered by Streamlit
-- No paid AI API key required
+- Summarize long text using an AI language model
+- Simple and interactive Streamlit interface
+- Built with Python and LangChain
+- Uses Ollama for local language-model inference
+- Easy to run and extend
 
-## 🛠️ Technologies
+## 🛠️ Tech Stack
 
 - Python
 - Streamlit
@@ -17,56 +22,61 @@ A simple AI-powered text summarizer built with Python, Streamlit, LangChain, and
 - Ollama
 - Llama 3.2 (1B)
 
-## 📋 Requirements
+## 🚀 Run Locally
 
-- Python 3.12 or a compatible Python version
-- Ollama installed
-- The `llama3.2:1b` model downloaded
-
-## 🚀 Installation
-
-### 1. Clone the repository
+Clone the repository:
 
 ```bash
 git clone https://github.com/rajuakhand/my-local-ai-summarizer.git
 cd my-local-ai-summarizer
 ```
 
-### 2. Create a virtual environment
+Create and activate a virtual environment:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install Python dependencies
+Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-### 4. Download the AI model
+Make sure Ollama is installed and running, then download the model:
 
 ```bash
 ollama pull llama3.2:1b
 ```
 
-### 5. Start the web app
-
-Make sure Ollama is running, then run:
+Start the application:
 
 ```bash
-python -m streamlit run app.py --server.fileWatcherType none
+python -m streamlit run app.py
 ```
 
-Open the local URL shown in the terminal, usually:
+Open `http://localhost:8501` in your browser.
 
-http://localhost:8501
+## 🌐 Live Demo
 
-## 🔒 Privacy
+Try the deployed application:
 
-Text is processed using a local Ollama model. Avoid exposing private information when sharing your computer or using other services.
+https://my-local-ai-summarizer-cetbdvs2ozk2mnvubxzeyj.streamlit.app/
 
-## 📄 License
+## 🗺️ Roadmap
+
+- [ ] Add a one-click Copy Summary button
+- [ ] Improve the UI and responsive layout
+- [ ] Add Bengali and English language options
+- [ ] Add sample text and word-count statistics
+- [ ] Improve error handling and documentation
+
+## 👨‍💻 About
+
+This project demonstrates practical skills in Python, LLM integration, prompt engineering, and web app development.
+
+If you find this project useful, consider giving the repository a ⭐.
+
 
 This project is open source. A license can be added when one is chosen.
