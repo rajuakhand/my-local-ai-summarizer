@@ -569,7 +569,8 @@ with left_col:
 
         except Exception as error:
             st.error(f"File processing failed: {error}")
-
+    if st.session_state.pop("clear_input_on_next_run", False):
+    st.session_state.input_text = ""
     input_text = st.text_area(
         "Paste or edit your text",
         key="input_text",
@@ -603,10 +604,11 @@ with left_col:
             use_container_width=True,
         )
 
-    if clear_clicked:
-        st.session_state.input_text = ""
-        st.session_state.summary = ""
-        st.rerun()
+   if clear_clicked:
+    st.session_state.input_text = ""
+    st.session_state.summary = ""
+    st.session_state.clear_input_on_next_run = True
+    st.rerun()
 
 
 # --------------------------------------------------
