@@ -121,6 +121,7 @@ DEFAULTS = {
     "last_mode": "Smart Summary",
     "last_model": MODELS[0],
     "last_length": "Medium",
+    "last_uploaded_file": None,
 }
 
 for key, value in DEFAULTS.items():
@@ -337,8 +338,6 @@ def generate_with_retry(client, prompt, primary_model):
                     ]
                 )
 
-                # Quota exhaustion usually needs waiting.
-                # Repeating requests won't reliably restore quota.
                 if (
                     "429" in error_text
                     or "resource_exhausted" in error_text
@@ -353,7 +352,6 @@ def generate_with_retry(client, prompt, primary_model):
                     delay += random.uniform(0, 0.5)
                     time.sleep(delay)
 
-        # Continue to the fallback model after primary fails.
         if model_index < len(models_to_try) - 1:
             continue
 
@@ -414,7 +412,6 @@ def make_pdf(text):
     styles = getSampleStyleSheet()
     story = []
 
-    # Use a Unicode font if available on the server.
     font_candidates = [
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
@@ -553,29 +550,28 @@ with left_col:
         help="Scanned PDFs without a text layer may need OCR.",
     )
 
-if uploaded_file is not None:
-    try:
-        uploaded_text = extract_uploaded_text(uploaded_file)
-
-        if uploaded_text:
-            st.session_state.input_text = uploaded_text
-            st.success(f"Loaded {uploaded_file.name}")
-        else:
-            st.warning("No readable text was found in this file.")
-
-    except Exception as error:
-        st.error(f"File processing failed: {error}")
-        
-if st.session_state.pop("clear_input_on_next_run", False):
-    st.session_state.input_text = ""
-    st.session_state.summary = ""
+    if uploaded_file is not None:
+        if st.session_state.last_uploaded_file != uploaded_file.name:
+            try:
+                uploaded_text = extract_uploaded_text(uploaded_file)
+                if uploaded_text:
+                    st.session_state.input_text = uploaded_text
+                    st.session_state.last_uploaded_file = uploaded_file.name
+                    st.success(f"Loaded {uploaded_file.name}")
+                    st.rerun()
+                else:
+                    st.warning("No readable text was found in this file.")
+            except Exception as error:
+                st.error(f"File processing failed: {error}")
 
     input_text = st.text_area(
-     "Paste or edit your text",
-     key="input_text",
-     height=300,
-     placeholder="Paste an article, notes, or any text here...",
+        "Paste or edit your text",
+        value=st.session_state.input_text,
+        height=300,
+        key="text_input_area",
+        placeholder="Paste an article, notes, essay, or document here...",
     )
+    st.session_state.input_text = input_text
 
     words = len(input_text.split())
     characters = len(input_text)
@@ -600,11 +596,12 @@ if st.session_state.pop("clear_input_on_next_run", False):
             "🗑️ Clear Input",
             use_container_width=True,
         )
-if clear_clicked:
-    st.session_state.input_text = ""
-    st.session_state.summary = ""
-    st.session_state.clear_input_on_next_run = True
-    st.rerun()
+
+    if clear_clicked:
+        st.session_state.input_text = ""
+        st.session_state.summary = ""
+        st.session_state.last_uploaded_file = None
+        st.rerun()
 
 
 # --------------------------------------------------
@@ -695,7 +692,6 @@ SOURCE TEXT:
                 history_item,
             )
 
-            # Keep the latest 20 summaries in this session.
             st.session_state.history = (
                 st.session_state.history[:20]
             )
@@ -727,7 +723,6 @@ with right_col:
             f"| Model: {st.session_state.last_model}"
         )
 
-        # Render RTL languages in a right-to-left container.
         if st.session_state.last_language in {
             "Arabic",
             "Urdu",
@@ -791,7 +786,6 @@ with right_col:
                 "To enable PDF export, add reportlab to requirements.txt."
             )
 
-        # Copy button with browser-side clipboard fallback.
         safe_copy_text = html.escape(summary)
 
         st.components.v1.html(
