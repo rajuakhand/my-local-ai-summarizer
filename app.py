@@ -37,7 +37,7 @@ except ImportError:
 # --------------------------------------------------
 
 st.set_page_config(
-    page_title="AI Text Summarizer Pro | Academic & Professional Edition",
+    page_title="AI Research & Text Summarizer Pro",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -141,7 +141,6 @@ st.markdown(
         color: #f8fafc;
     }
 
-    /* Trust & Hero Banner */
     .hero-container {
         background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -183,7 +182,6 @@ st.markdown(
         border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* Glass Cards */
     .glass-card {
         background: rgba(30, 41, 59, 0.7);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -559,7 +557,7 @@ with st.sidebar:
 
 
 # --------------------------------------------------
-# INPUT SECTION (With Fixed Clear Bug)
+# INPUT SECTION (Perfect State Sync)
 # --------------------------------------------------
 
 left_col, right_col = st.columns(
@@ -583,9 +581,6 @@ with left_col:
                 if uploaded_text:
                     st.session_state.input_text = uploaded_text
                     st.session_state.last_uploaded_file = uploaded_file.name
-                    # Clear widget state cache so text_area updates immediately
-                    if "text_input_area" in st.session_state:
-                        del st.session_state["text_input_area"]
                     st.success(f"Successfully loaded {uploaded_file.name}")
                     st.rerun()
                 else:
@@ -593,15 +588,13 @@ with left_col:
             except Exception as error:
                 st.error(f"File processing failed: {error}")
 
-    # Text area with dedicated persistent session key
+    # Text area linked directly to session_state.input_text via key="input_text"
     input_text = st.text_area(
         "Paste or edit your document text here",
-        value=st.session_state.input_text,
         height=300,
-        key="text_input_area",
+        key="input_text",
         placeholder="Paste your thesis, research paper, dissertation chapter, or essay...",
     )
-    st.session_state.input_text = input_text
 
     words = len(input_text.split())
     characters = len(input_text)
@@ -626,13 +619,11 @@ with left_col:
             use_container_width=True,
         )
 
-    # Fixed Clear Button Logic: completely purges the widget cache key
+    # 100% Reliable Clear Logic
     if clear_clicked:
         st.session_state.input_text = ""
         st.session_state.summary = ""
         st.session_state.last_uploaded_file = None
-        if "text_input_area" in st.session_state:
-            del st.session_state["text_input_area"]
         st.rerun()
 
 
@@ -887,7 +878,9 @@ with right_col:
             "🆕 Start New Summary",
             use_container_width=True,
         ):
+            st.session_state.input_text = ""
             st.session_state.summary = ""
+            st.session_state.last_uploaded_file = None
             st.rerun()
 
     else:
@@ -972,7 +965,7 @@ if history:
         st.write(selected_history["text"])
 
 else:
-    st.info(
+   st.info(
         "Your generated summaries will appear here for quick reference during your active session."
     )
 
