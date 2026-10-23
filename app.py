@@ -557,7 +557,7 @@ with st.sidebar:
 
 
 # --------------------------------------------------
-# INPUT SECTION (Perfect State Sync)
+# INPUT SECTION (Error-Free State Management)
 # --------------------------------------------------
 
 left_col, right_col = st.columns(
@@ -588,13 +588,15 @@ with left_col:
             except Exception as error:
                 st.error(f"File processing failed: {error}")
 
-    # Text area linked directly to session_state.input_text via key="input_text"
-    input_text = st.text_area(
+    # Safe text_area without conflicting key parameter, preventing StreamlitWidgetAlreadyInstantiatedError
+    st.session_state.input_text = st.text_area(
         "Paste or edit your document text here",
+        value=st.session_state.input_text,
         height=300,
-        key="input_text",
         placeholder="Paste your thesis, research paper, dissertation chapter, or essay...",
     )
+    
+    input_text = st.session_state.input_text
 
     words = len(input_text.split())
     characters = len(input_text)
@@ -619,7 +621,6 @@ with left_col:
             use_container_width=True,
         )
 
-    # 100% Reliable Clear Logic
     if clear_clicked:
         st.session_state.input_text = ""
         st.session_state.summary = ""
@@ -965,7 +966,7 @@ if history:
         st.write(selected_history["text"])
 
 else:
-   st.info(
+    st.info(
         "Your generated summaries will appear here for quick reference during your active session."
     )
 
