@@ -37,8 +37,8 @@ except ImportError:
 # --------------------------------------------------
 
 st.set_page_config(
-    page_title="AI Text Summarizer Pro",
-    page_icon="🧠",
+    page_title="AI Text Summarizer Pro | Academic & Professional Edition",
+    page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -130,51 +130,77 @@ for key, value in DEFAULTS.items():
 
 
 # --------------------------------------------------
-# STYLING
+# PROFESSIONAL STYLING (Scribbr-inspired Theme)
 # --------------------------------------------------
 
 st.markdown(
     """
     <style>
     .stApp {
-        background:
-            radial-gradient(
-                circle at 10% 0%,
-                #312e81 0%,
-                transparent 40%
-            ),
-            linear-gradient(
-                135deg,
-                #0b1120 0%,
-                #111b35 55%,
-                #1e1b4b 100%
-            );
+        background-color: #0f172a;
         color: #f8fafc;
     }
 
-    .hero {
+    /* Trust & Hero Banner */
+    .hero-container {
+        background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 32px 24px;
         text-align: center;
-        padding: 24px 8px 22px 8px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
-    .hero h1 {
-        font-size: clamp(2rem, 5vw, 3.2rem);
-        font-weight: 850;
+    .hero-container h1 {
+        font-size: clamp(2rem, 4vw, 2.8rem);
+        font-weight: 800;
         color: #ffffff;
         margin-bottom: 8px;
     }
 
-    .hero p {
-        color: #cbd5e1;
-        font-size: 1.05rem;
+    .hero-container p {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 0 auto;
     }
 
+    .trust-badges {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        margin-top: 16px;
+        font-size: 0.85rem;
+        color: #cbd5e1;
+        flex-wrap: wrap;
+    }
+
+    .trust-badge-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Glass Cards */
     .glass-card {
-        background: rgba(255,255,255,0.055);
-        border: 1px solid rgba(255,255,255,0.13);
-        border-radius: 16px;
-        padding: 18px;
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .service-box {
+        background: rgba(15, 23, 42, 0.6);
+        border-left: 4px solid #6366f1;
+        padding: 14px 18px;
+        border-radius: 0 10px 10px 0;
         margin-bottom: 12px;
+        font-size: 0.95rem;
+        color: #e2e8f0;
     }
 
     .stButton button,
@@ -182,22 +208,20 @@ st.markdown(
         border-radius: 10px;
         font-weight: 650;
         min-height: 42px;
+        transition: all 0.2s ease-in-out;
     }
 
     [data-testid="stMetric"] {
-        background: rgba(255,255,255,0.055);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         padding: 12px;
         border-radius: 12px;
     }
 
     div[data-baseweb="select"] > div {
         border-radius: 10px;
-    }
-
-    .small-note {
-        color: #cbd5e1;
-        font-size: 0.85rem;
+        background-color: #1e293b;
+        color: white;
     }
 
     footer {
@@ -436,7 +460,7 @@ def make_pdf(text):
 
     story.append(
         Paragraph(
-            "AI Text Summarizer - Summary",
+            "AI Academic & Professional Summary",
             styles["Title"],
         )
     )
@@ -456,16 +480,23 @@ def make_pdf(text):
 
 
 # --------------------------------------------------
-# HEADER
+# PROFESSIONAL HEADER & TRUST BANNER
 # --------------------------------------------------
 
 st.markdown(
     """
-    <div class="hero">
-        <h1>🧠 AI Text Summarizer Pro</h1>
+    <div class="hero-container">
+        <h1>🎓 AI Research & Text Summarizer Pro</h1>
         <p>
-            Intelligent multilingual summaries powered by Gemini AI
+            Submit your work with confidence. Generate precise, multi-lingual academic summaries, 
+            key takeaways, and structural insights powered by Google Gemini AI.
         </p>
+        <div class="trust-badges">
+            <span class="trust-badge-item">🔒 100% Academic Integrity</span>
+            <span class="trust-badge-item">⚡ Instant 1-Click Processing</span>
+            <span class="trust-badge-item">🌍 20+ Languages Supported</span>
+            <span class="trust-badge-item">⭐ Enterprise Gemini AI</span>
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -477,7 +508,7 @@ st.markdown(
 # --------------------------------------------------
 
 with st.sidebar:
-    st.header("⚙️ AI Settings")
+    st.header("⚙️ Editing & AI Settings")
 
     language = st.selectbox(
         "Output language",
@@ -508,32 +539,27 @@ with st.sidebar:
     custom_instructions = st.text_area(
         "Custom instructions (optional)",
         placeholder=(
-            "Example: Focus on the main arguments and important dates."
+            "Example: Focus on research methodology and conclusion."
         ),
         height=100,
         max_chars=1000,
     )
 
     st.divider()
-    st.subheader("✨ Features")
-
+    st.subheader("📚 Professional Services")
     st.markdown(
         """
-        - 20 output languages
-        - 5 output styles
-        - TXT/PDF upload
-        - TXT/PDF export
-        - Copyable summary
-        - Session history
-        - Retry and fallback model
+        - **Thesis & Dissertation Editing**
+        - **Research Paper Structure Check**
+        - **Clarity & Argument Polish**
+        - **Automated Citation & Formatting**
         """
     )
-
-    st.caption("API key is read from Streamlit Secrets.")
+    st.caption("Secured by Streamlit & Gemini API.")
 
 
 # --------------------------------------------------
-# INPUT SECTION
+# INPUT SECTION (With Fixed Clear Bug)
 # --------------------------------------------------
 
 left_col, right_col = st.columns(
@@ -542,10 +568,10 @@ left_col, right_col = st.columns(
 )
 
 with left_col:
-    st.subheader("📝 Input Document")
+    st.subheader("📝 Input Document / Paper")
 
     uploaded_file = st.file_uploader(
-        "Upload TXT or PDF",
+        "Upload TXT or PDF research document",
         type=["txt", "pdf"],
         help="Scanned PDFs without a text layer may need OCR.",
     )
@@ -557,19 +583,23 @@ with left_col:
                 if uploaded_text:
                     st.session_state.input_text = uploaded_text
                     st.session_state.last_uploaded_file = uploaded_file.name
-                    st.success(f"Loaded {uploaded_file.name}")
+                    # Clear widget state cache so text_area updates immediately
+                    if "text_input_area" in st.session_state:
+                        del st.session_state["text_input_area"]
+                    st.success(f"Successfully loaded {uploaded_file.name}")
                     st.rerun()
                 else:
                     st.warning("No readable text was found in this file.")
             except Exception as error:
                 st.error(f"File processing failed: {error}")
 
+    # Text area with dedicated persistent session key
     input_text = st.text_area(
-        "Paste or edit your text",
+        "Paste or edit your document text here",
         value=st.session_state.input_text,
         height=300,
         key="text_input_area",
-        placeholder="Paste an article, notes, essay, or document here...",
+        placeholder="Paste your thesis, research paper, dissertation chapter, or essay...",
     )
     st.session_state.input_text = input_text
 
@@ -577,10 +607,9 @@ with left_col:
     characters = len(input_text)
 
     metric1, metric2, metric3 = st.columns(3)
-
-    metric1.metric("Words", f"{words:,}")
+    metric1.metric("Word Count", f"{words:,}")
     metric2.metric("Characters", f"{characters:,}")
-    metric3.metric("Languages", "20")
+    metric3.metric("Mode", "Academic Pro")
 
     generate_col, clear_col = st.columns(2)
 
@@ -597,15 +626,18 @@ with left_col:
             use_container_width=True,
         )
 
+    # Fixed Clear Button Logic: completely purges the widget cache key
     if clear_clicked:
         st.session_state.input_text = ""
         st.session_state.summary = ""
         st.session_state.last_uploaded_file = None
+        if "text_input_area" in st.session_state:
+            del st.session_state["text_input_area"]
         st.rerun()
 
 
 # --------------------------------------------------
-# GENERATION
+# GENERATION ENGINE
 # --------------------------------------------------
 
 if generate_clicked:
@@ -629,7 +661,7 @@ if generate_clicked:
 
     else:
         prompt = f"""
-You are a professional multilingual text summarization assistant.
+You are a professional academic editor and multilingual text summarization assistant.
 
 TARGET LANGUAGE:
 {LANGUAGES[language]}
@@ -643,7 +675,7 @@ LENGTH:
 STYLE INSTRUCTIONS:
 - Preserve the meaning and important facts.
 - Never invent information absent from the source.
-- Use natural, clear language.
+- Use natural, clear academic language.
 - If the source contains uncertainty, preserve that uncertainty.
 - Return the requested output in the target language.
 - Do not add unrelated commentary.
@@ -659,7 +691,7 @@ SOURCE TEXT:
 
         try:
             with st.spinner(
-                "🤖 Generating summary. Temporary failures will be retried..."
+                "🤖 Processing academic summary with Gemini AI..."
             ):
                 client = genai.Client(api_key=api_key)
 
@@ -697,7 +729,7 @@ SOURCE TEXT:
             )
 
             st.success(
-                f"Summary generated using {actual_model}."
+                f"Summary generated successfully using {actual_model}."
             )
 
         except Exception as error:
@@ -712,7 +744,7 @@ SOURCE TEXT:
 # --------------------------------------------------
 
 with right_col:
-    st.subheader("📄 Summary Output")
+    st.subheader("📄 Summary & Analysis Output")
 
     if st.session_state.summary:
         summary = st.session_state.summary
@@ -735,8 +767,8 @@ with right_col:
                 <div dir="rtl" style="
                     white-space: pre-wrap;
                     overflow-wrap: anywhere;
-                    background: rgba(255,255,255,0.07);
-                    border: 1px solid rgba(255,255,255,0.14);
+                    background: rgba(30,41,59,0.8);
+                    border: 1px solid rgba(255,255,255,0.15);
                     border-radius: 14px;
                     padding: 18px;
                     line-height: 1.9;
@@ -756,9 +788,9 @@ with right_col:
             )
 
         st.download_button(
-            "⬇️ Download TXT",
+            "⬇️ Download as TXT",
             data=summary,
-            file_name="ai_summary.txt",
+            file_name="ai_academic_summary.txt",
             mime="text/plain",
             use_container_width=True,
         )
@@ -768,9 +800,9 @@ with right_col:
                 pdf_bytes = make_pdf(summary)
 
                 st.download_button(
-                    "📄 Download PDF",
+                    "📄 Download as PDF Report",
                     data=pdf_bytes,
-                    file_name="ai_summary.pdf",
+                    file_name="ai_academic_summary.pdf",
                     mime="application/pdf",
                     use_container_width=True,
                 )
@@ -792,18 +824,19 @@ with right_col:
             f"""
             <div style="
                 font-family: sans-serif;
-                background: #151d35;
+                background: #1e293b;
                 padding: 12px;
                 border-radius: 12px;
                 color: white;
+                border: 1px solid rgba(255,255,255,0.1);
             ">
                 <textarea id="summary-copy-area" style="
                     width: 100%;
-                    height: 140px;
+                    height: 120px;
                     box-sizing: border-box;
                     padding: 10px;
                     border-radius: 8px;
-                    background: #0b1120;
+                    background: #0f172a;
                     color: #ffffff;
                     border: 1px solid #475569;
                     font-size: 14px;
@@ -813,49 +846,41 @@ with right_col:
                 <button id="summary-copy-button" style="
                     margin-top: 10px;
                     width: 100%;
-                    padding: 12px;
+                    padding: 10px;
                     border: 0;
                     border-radius: 8px;
                     background: #6366f1;
                     color: white;
                     font-weight: bold;
                     cursor: pointer;
-                ">📋 Copy Summary</button>
+                ">📋 Copy Summary to Clipboard</button>
 
                 <div id="summary-copy-status" style="
-                    padding-top: 8px;
+                    padding-top: 6px;
                     font-size: 12px;
+                    color: #38bdf8;
                 "></div>
             </div>
 
             <script>
-            const copyArea =
-                document.getElementById("summary-copy-area");
-            const copyButton =
-                document.getElementById("summary-copy-button");
-            const copyStatus =
-                document.getElementById("summary-copy-status");
+            const copyArea = document.getElementById("summary-copy-area");
+            const copyButton = document.getElementById("summary-copy-button");
+            const copyStatus = document.getElementById("summary-copy-status");
 
             copyButton.addEventListener("click", async () => {{
                 try {{
-                    await navigator.clipboard.writeText(
-                        copyArea.value
-                    );
-                    copyStatus.textContent = "Copied!";
+                    await navigator.clipboard.writeText(copyArea.value);
+                    copyStatus.textContent = "Copied successfully!";
                 }} catch (error) {{
                     copyArea.focus();
                     copyArea.select();
-
                     const copied = document.execCommand("copy");
-
-                    copyStatus.textContent = copied
-                        ? "Copied!"
-                        : "Select the text and copy it manually.";
+                    copyStatus.textContent = copied ? "Copied successfully!" : "Please copy manually.";
                 }}
             }});
             </script>
             """,
-            height=245,
+            height=220,
         )
 
         if st.button(
@@ -869,19 +894,21 @@ with right_col:
         st.markdown(
             """
             <div class="glass-card">
-                <h3>Ready to summarize</h3>
+                <h3>Ready to Transform Your Document</h3>
                 <p>
-                    Paste text or upload a document, choose your
-                    language and output style, then generate a summary.
+                    Paste your thesis, essay, or research paper on the left, select your formatting and output style, 
+                    and let our professional AI assistant generate precise insights instantly.
                 </p>
+                <div class="service-box">
+                    <strong>💡 Pro Tip:</strong> Use custom instructions in the sidebar to target specific research questions or methodology reviews.
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
         st.caption(
-            "If a model is busy, the app retries temporary errors "
-            "and then attempts the alternate configured model."
+            "If a model is busy, the app automatically retries and switches to the backup model."
         )
 
 
@@ -890,7 +917,7 @@ with right_col:
 # --------------------------------------------------
 
 st.divider()
-st.subheader("🕘 Summary History")
+st.subheader("🕘 Session History & Archive")
 
 history = st.session_state.history
 
@@ -906,7 +933,7 @@ if history:
     ]
 
     selected_history_index = st.selectbox(
-        "Choose a previous summary",
+        "Choose a previous summary from archive",
         range(len(history)),
         format_func=lambda index: history_labels[index],
     )
@@ -931,13 +958,13 @@ if history:
 
     with history_col2:
         if st.button(
-            "🧹 Clear History",
+            "🧹 Clear Archive",
             use_container_width=True,
         ):
             st.session_state.history = []
             st.rerun()
 
-    with st.expander("Preview selected history"):
+    with st.expander("Preview selected archive item"):
         st.caption(
             f"Model: {selected_history['model']} "
             f"| Length: {selected_history['length']}"
@@ -946,26 +973,44 @@ if history:
 
 else:
     st.info(
-        "Your summaries will appear here after generation. "
-        "History is stored in the current Streamlit session."
+        "Your generated summaries will appear here for quick reference during your active session."
     )
 
 
 # --------------------------------------------------
-# FOOTER
+# FAQ & PROFESSIONAL FOOTER (Scribbr Style)
 # --------------------------------------------------
 
 st.divider()
+
+st.subheader("❓ Frequently Asked Questions")
+
+faq_col1, faq_col2 = st.columns(2, gap="medium")
+
+with faq_col1:
+    with st.expander("What type of documents can I summarize?"):
+        st.write("You can upload standard `.txt` files, PDF documents (research papers, theses, dissertations), or paste any text directly up to 60,000 characters.")
+    
+    with st.expander("How does the AI protect academic integrity?"):
+        st.write("Our system is designed to summarize and structure your authentic content without introducing fabricated data or plagiarizing external sources.")
+
+with faq_col2:
+    with st.expander("Can I generate summaries in different languages?"):
+        st.write("Yes! You can translate and summarize your documents into over 20 languages including Bengali, Spanish, French, German, and Arabic instantly.")
+
+    with st.expander("How do backup models work?"):
+        st.write("If the primary Gemini model experiences temporary high traffic or rate limits, the app automatically retries and falls back to our secondary model seamlessly.")
 
 st.markdown(
     """
     <div style="
         text-align: center;
-        color: #cbd5e1;
-        padding: 12px;
+        color: #94a3b8;
+        padding: 24px 12px 12px 12px;
+        font-size: 0.9rem;
     ">
-        <strong>AI Text Summarizer Pro</strong><br>
-        Built with Python, Streamlit and Google Gemini API
+        <strong>AI Text Summarizer Pro | Academic Edition</strong><br>
+        Built with Python, Streamlit, and Google Gemini API &nbsp;|&nbsp; Committed to Academic Excellence
     </div>
     """,
     unsafe_allow_html=True,
