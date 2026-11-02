@@ -1280,6 +1280,147 @@ with pcol2:
 
 st.divider()
 
+# --------------------------------------------------
+# AI ATS RESUME VS JOB DESCRIPTION MATCHER
+# --------------------------------------------------
+
+st.subheader("🎯 AI ATS Resume vs Job Description Matcher")
+st.caption("Check your resume's ATS compatibility against any job description and get actionable suggestions.")
+
+ats_c1, ats_c2 = st.columns([1, 1], gap="large")
+
+with ats_c1:
+    st.markdown("### 1) Upload Resume")
+    resume_up = st.file_uploader("Upload Resume (TXT or PDF)", type=["txt", "pdf"], key="ats_resume")
+    resume_txt = ""
+    if resume_up is not None:
+        try:
+            resume_txt = extract_uploaded_text(resume_up)
+            if resume_txt.strip():
+                st.success(f"Loaded {resume_up.name}")
+                with st.expander("Resume Preview"):
+                    st.text(resume_txt[:700] + ("..." if len(resume_txt) > 700 else ""))
+            else:
+                st.warning("No readable text found.")
+        except Exception as e:
+            st.error(f"Error: {e}")
+    
+    st.markdown("### 2) Job Description")
+    jd_mode = st.radio("Provide Job Description", ["Paste text", "Upload file (TXT/PDF)"], key="jd_mode")
+    jd_txt = ""
+    if jd_mode == "Paste text":
+        jd_txt = st.text_area("Paste Job Description", height=220, placeholder="Job title, requirements, responsibilities, qualifications...", key="jd_area")
+    else:
+        jd_up = st.file_uploader("Upload JD (TXT or PDF)", type=["txt", "pdf"], key="jd_up")
+        if jd_up is not None:
+            try:
+                jd_txt = extract_uploaded_text(jd_up)
+                if jd_txt.strip():
+                    st.success(f"Loaded {jd_up.name}")
+                    with st.expander("JD Preview"):
+                        st.text(jd_txt[:600] + ("..." if len(jd_txt) > 600 else ""))
+                else:
+                    st.warning("No readable text found.")
+            except Exception as e:
+                st.error(f"Error: {e}")
+    
+    ats_run = st.button("🔍 Analyze ATS Match", type="primary", use_container_width=True)
+    
+    if ats_run:
+        api_key = get_api_key()
+        if not api_key:
+            st.error("GEMINI_API_KEY missing. Add in Streamlit Secrets.")
+        elif not resume_txt.strip():
+            st.warning("Upload your resume first.")
+        elif not jd_txt.strip():
+            st.warning("Provide job description first.")
+        else:
+            try:
+                with st.spinner("Analyzing against ATS criteria..."):
+                    import re, json
+                    client = genai.Client(api_key=api_key)
+                    prompt = f"""You are an expert ATS analyst. Compare this resume against the job description.
+
+RESUME:
+{resume_txt[:38000]}
+
+JOB DESCRIPTION:
+{jd_txt[:38000]}
+
+Return a detailed report in this exact structure:
+
+## ATS MATCH SCORE
+Give score 0-100 with 1 line reasoning
+
+## OVERALL VERDICT
+Excellent/Good/Moderate/Poor + explanation
+
+## MATCHED KEYWORDS
+Top matched hard/soft skills (8-12)
+
+## MISSING KEYWORDS
+Critical missing keywords (8-12), prioritize by importance
+
+## HARD SKILLS GAP
+Specific technical skills missing
+
+## SOFT SKILLS GAP
+Relevant soft skills missing
+
+## STRENGTHS
+Top 4 strengths
+
+## WEAKNESSES
+Top 4 weaknesses
+
+## ATS OPTIMIZATION TIPS
+5 actionable tips (concrete rewrites suggested)
+
+## QUICK WINS (Do in 30 min)
+3 immediate fixes
+
+Be specific, practical, and honest."""
+                    res, used = generate_with_retry(client, prompt, model_name)
+                    st.session_state.ats_report = res
+                    st.success("Analysis complete!")
+                    st.rerun()
+            except Exception as e:
+                st.error(classify_api_error(e))
+
+with ats_c2:
+    st.markdown("### Analysis Report")
+    if st.session_state.get("ats_report"):
+        rep = st.session_state.ats_report
+        import re
+        m = re.search(r'ATS MATCH SCORE[^\d]*(\d+)', rep, re.I)
+        if m:
+            sc = int(m.group(1))
+            if sc >= 80: st.success(f"🎉 ATS Score: {sc}/100 — Excellent")
+            elif sc >= 65: st.info(f"👍 ATS Score: {sc}/100 — Good")
+            elif sc >= 50: st.warning(f"⚠️ ATS Score: {sc}/100 — Moderate")
+            else: st.error(f"❌ ATS Score: {sc}/100 — Needs Work")
+            st.progress(sc/100)
+        st.markdown(rep)
+        st.download_button("📥 Download Report (TXT)", data=rep, file_name=f"ats_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", use_container_width=True)
+        if st.button("🔄 New Analysis", use_container_width=True):
+            st.session_state.ats_report = ""
+            st.rerun()
+    else:
+        st.markdown("""
+        <div class="glass-card">
+            <h4>What you'll get</h4>
+            <ul>
+                <li>ATS Match Score (0-100)</li>
+                <li>Matched vs Missing Keywords</li>
+                <li>Skills Gap Analysis</li>
+                <li>Tailored Fix Suggestions</li>
+                <li>Quick Wins to Apply Today</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.divider()
+
 st.subheader("❓ Frequently Asked Questions")
 
 faq_col1, faq_col2 = st.columns(2, gap="medium")
