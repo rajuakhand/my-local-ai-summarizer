@@ -134,6 +134,7 @@ DEFAULTS = {
     "solver_answer": "",
     "career_roadmap": "",
     "wellness_report": "",
+    "eco_report": "",
 }
 
 for key, value in DEFAULTS.items():
@@ -1833,6 +1834,139 @@ with wl_c2:
             </ul>
             <div class="service-box">
                 <strong>Note:</strong> For awareness only. Not medical diagnosis.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.divider()
+
+# --------------------------------------------------
+# AI STUDENT DAILY ENVIRONMENTAL FOOTPRINT & POLLUTION TRACKER
+# --------------------------------------------------
+
+st.subheader("🌱 AI Student Daily Environmental Footprint & Pollution Tracker")
+st.caption("Track your real daily actions from morning to night and see your true environmental impact with evidence-based calculations.")
+
+eco_c1, eco_c2 = st.columns([1, 1], gap="large")
+
+with eco_c1:
+    st.markdown("### 🚍 Transport")
+    eco_walk = st.number_input("Walking/Cycling (km)", min_value=0.0, step=0.1)
+    eco_bus = st.number_input("Bus/Public Transport (km)", min_value=0.0, step=0.1)
+    eco_rickshaw = st.number_input("Rickshaw/CNG/Auto (km)", min_value=0.0, step=0.1)
+    eco_bike = st.number_input("Motorbike/Scooter (km)", min_value=0.0, step=0.1)
+    eco_car = st.number_input("Car/Private Vehicle (km)", min_value=0.0, step=0.1)
+    
+    st.markdown("### 🍛 Food & Diet")
+    eco_veg = st.number_input("Veg/Home Meal (meals)", min_value=0, step=1)
+    eco_egg = st.number_input("Egg-based Meal (meals)", min_value=0, step=1)
+    eco_chicken = st.number_input("Chicken (meals)", min_value=0, step=1)
+    eco_beef = st.number_input("Beef/Mutton (meals)", min_value=0, step=1)
+    eco_fastfood = st.number_input("Fast Food/Packaged Food (meals/snacks)", min_value=0, step=1)
+    
+    st.markdown("### 🛍️ Plastic, Packaging & Waste")
+    eco_bottle = st.number_input("Plastic Bottle Used (pcs)", min_value=0, step=1)
+    eco_bag = st.number_input("Polythene Bag Used (pcs)", min_value=0, step=1)
+    eco_takeaway = st.number_input("Takeaway with plastic/container (times)", min_value=0, step=1)
+    eco_disposable = st.number_input("Disposable cup/plate/spoon (pcs)", min_value=0, step=1)
+    
+    st.markdown("### 💡 Electricity & Water")
+    eco_fan = st.number_input("Fan used (hours)", min_value=0.0, step=0.5)
+    eco_ac = st.number_input("AC used (hours)", min_value=0.0, step=0.5)
+    eco_light = st.number_input("Lights used (hours)", min_value=0.0, step=0.5)
+    eco_charge = st.number_input("Phone/Laptop charging (hours)", min_value=0.0, step=0.5)
+    eco_shower = st.number_input("Shower/Bath usage (times)", min_value=0, step=1)
+    eco_wash = st.number_input("Clothes wash (times)", min_value=0, step=1)
+    
+    st.markdown("### 🗑️ Other")
+    eco_paper = st.number_input("Printed/A4 paper used (sheets)", min_value=0, step=1)
+    eco_online_del = st.number_input("Online food/grocery delivery (orders)", min_value=0, step=1)
+    eco_tissue = st.number_input("Tissue paper used (approx rolls/sheets count)", min_value=0, step=1)
+    
+    eco_calc = st.button("🧮 Calculate My Daily Footprint", type="primary", use_container_width=True)
+    
+    if eco_calc:
+        api_key = get_api_key()
+        if not api_key:
+            st.error("GEMINI_API_KEY missing.")
+        else:
+            try:
+                with st.spinner("Calculating with research-based emission factors..."):
+                    client = genai.Client(api_key=api_key)
+                    prompt = f"""You are an environmental scientist specializing in student carbon/waste footprints.
+
+Use realistic, paper-based emission factors (aligned with IPCC, DEFRA 2024 style, Our World in Data).
+
+DAILY LOG:
+Transport: walk/cycle {eco_walk}km, bus {eco_bus}km, rickshaw/cng {eco_rickshaw}km, bike {eco_bike}km, car {eco_car}km
+Food: veg {eco_veg}, egg {eco_egg}, chicken {eco_chicken}, beef/mutton {eco_beef}, fastfood {eco_fastfood}
+Plastic/Waste: bottle {eco_bottle}, bag {eco_bag}, takeaway {eco_takeaway}, disposable {eco_disposable}
+Electricity/Water: fan {eco_fan}h, ac {eco_ac}h, light {eco_light}h, charge {eco_charge}h, shower {eco_shower}, wash {eco_wash}
+Others: paper {eco_paper}, delivery {eco_online_del}, tissue {eco_tissue}
+
+Calculate and show:
+
+## DAILY ENVIRONMENTAL FOOTPRINT SUMMARY
+Total CO₂e (kg CO₂ equivalent) for today
+
+## BREAKDOWN BY CATEGORY
+Transport | Food | Plastic & Packaging | Energy (Electricity) | Water/Waste | Others - with kg CO₂e + %
+
+## TOP POLLUTER
+Which action caused most impact + why
+
+## REAL COMPARISONS
+e.g. "Equals driving X km by car" / "Needs ~X trees for 1 year to offset this single day" (pragmatic)
+
+## HIDDEN IMPACTS
+Small actions often ignored
+
+## WHAT YOU CAN DO TOMORROW (PRACTICAL)
+At least 5 realistic steps for a student (low cost/no cost)
+
+## 7-DAY ECO-CHALLENGE
+Day1-Day7 with doable targets to cut footprint
+
+## AWARENESS FOR A STUDENT
+Explain in simple words how small choices add up over month/year
+
+## EVIDENCE NOTE
+State factors used are approximate but research-aligned for learning awareness
+
+Be honest, educational, Bangladesh/Global relatable. Focus on action over guilt."""
+                    res, used = generate_with_retry(client, prompt, model_name)
+                    st.session_state.eco_report = res
+                    st.success("Footprint calculated!")
+                    st.rerun()
+            except Exception as e:
+                st.error(classify_api_error(e))
+
+with eco_c2:
+    st.markdown("### Your Daily Impact Report")
+    if st.session_state.get("eco_report"):
+        er = st.session_state.eco_report
+        st.markdown(er)
+        st.download_button("📥 Download Report (TXT)", data=er, file_name=f"Student_Daily_Footprint_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", use_container_width=True)
+        if st.button("🔄 Track Another Day", use_container_width=True):
+            st.session_state.eco_report = ""
+            st.rerun()
+    else:
+        st.markdown("""
+        <div class="glass-card">
+            <h4>Track From Morning To Night</h4>
+            <p>See real impact of your daily choices:</p>
+            <ul>
+                <li>🚲 Transport footprint</li>
+                <li>🍽️ Food choices impact</li>
+                <li>♻️ Plastic & packaging</li>
+                <li>⚡ Energy & water use</li>
+                <li>📊 kg CO₂e breakdown</li>
+                <li>🌳 Tree-offset comparison</li>
+                <li>✅ Easy ways to reduce</li>
+                <li>📆 7-Day Eco-Challenge</li>
+            </ul>
+            <div class="service-box">
+                <strong>Goal:</strong> Awareness through numbers - not guilt, action.
             </div>
         </div>
         """, unsafe_allow_html=True)
