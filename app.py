@@ -130,6 +130,8 @@ DEFAULTS = {
     "flashcards": [],
     "slides_data": [],
     "ats_report": "",
+    "solver_question": "",
+    "solver_answer": "",
 }
 
 for key, value in DEFAULTS.items():
@@ -1416,6 +1418,137 @@ with ats_c2:
                 <li>Tailored Fix Suggestions</li>
                 <li>Quick Wins to Apply Today</li>
             </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.divider()
+
+# --------------------------------------------------
+# AI PROBLEM SOLVER & SMART TUTOR
+# --------------------------------------------------
+
+st.subheader("🧠 AI Problem Solver & Smart Tutor")
+st.caption("Get step-by-step, mathematical, conceptual or analytical solutions in the simplest way possible.")
+
+ps_c1, ps_c2 = st.columns([1, 1], gap="large")
+
+with ps_c1:
+    st.markdown("### Problem Input")
+    ps_mode = st.radio("Input Method", ["Paste Question", "Upload File (TXT/PDF)"], key="ps_mode")
+    ps_qtext = ""
+    if ps_mode == "Paste Question":
+        ps_qtext = st.text_area("Enter your question/problem here", height=200, placeholder="Paste math, physics, chemistry, or any question...\nYou can also paste multiple questions.", key="ps_qarea")
+        st.session_state.solver_question = ps_qtext
+    else:
+        ps_f = st.file_uploader("Upload question file", type=["txt", "pdf"], key="ps_file")
+        if ps_f is not None:
+            try:
+                ps_qtext = extract_uploaded_text(ps_f)
+                if ps_qtext.strip():
+                    st.success(f"Loaded {ps_f.name}")
+                    st.session_state.solver_question = ps_qtext
+                    with st.expander("Preview"):
+                        st.text(ps_qtext[:700] + ("..." if len(ps_qtext) > 700 else ""))
+                else:
+                    st.warning("Empty file")
+            except Exception as e:
+                st.error(f"Error: {e}")
+    
+    st.markdown("### Solution Settings")
+    ps_subject = st.selectbox("Subject", ["Mathematics", "Physics", "Chemistry", "Biology", "Economics", "Statistics", "Logic/Reasoning", "Computer Science", "General/Other"], key="ps_subj")
+    ps_goal = st.selectbox("Solution Type", ["Step-by-Step Solution", "Mathematical Derivation", "Conceptual Explanation", "Analytical Reasoning", "Exam-Oriented Answer", "Explain Like I'm a Beginner"], key="ps_goal")
+    ps_level = st.select_slider("Explanation Level", options=["Beginner", "Intermediate", "Advanced"], value="Beginner")
+    ps_alt = st.checkbox("Also show alternative method", value=True)
+    ps_prac = st.checkbox("Generate 2 practice questions based on this", value=True)
+    
+    ps_btn = st.button("🚀 Solve Problem", type="primary", use_container_width=True)
+    
+    if ps_btn:
+        api_key = get_api_key()
+        qin = ps_qtext if ps_qtext.strip() else st.session_state.get("solver_question", "")
+        if not api_key:
+            st.error("GEMINI_API_KEY missing.")
+        elif not qin.strip():
+            st.warning("Enter or upload a question first.")
+        else:
+            try:
+                with st.spinner("Thinking through this problem..."):
+                    client = genai.Client(api_key=api_key)
+                    prompt = f"""You are an expert tutor who explains complex problems clearly with logic.
+
+SUBJECT: {ps_subject}
+GOAL: {ps_goal}
+LEVEL: {ps_level}
+SHOW ALTERNATIVE METHOD: {ps_alt}
+GENERATE PRACTICE: {ps_prac}
+
+QUESTION:
+{qin[:45000]}
+
+Follow these rules strictly:
+- Give a crystal clear answer tailored to {ps_level}
+- Use step by step breakdown with numbers/logic
+- Show formulas used if any
+- For math: show each calculation clearly
+- For theory: explain with reasoning
+- Use simple words first, then precise terms
+- If diagram logic helps, describe in text
+- Be accurate, don't guess
+
+Structure your response as:
+
+## PROBLEM STATEMENT
+[Restate clearly]
+
+## SOLUTION (STEP BY STEP)
+[Numbered steps with explanation]
+
+## FINAL ANSWER
+[Clear final answer highlighted]
+
+## KEY CONCEPTS USED
+[Bulleted list]
+
+## COMMON MISTAKES TO AVOID
+[2-3 points]
+
+{"## ALTERNATIVE METHOD" if ps_alt else ""}
+{"[If alternative exists, show another approach with steps]" if ps_alt else ""}
+
+{"## PRACTICE QUESTIONS FOR YOU" if ps_prac else ""}
+{"[Give 2 new questions on same topic with answers at end: 'ANSWERS FOR PRACTICE']" if ps_prac else ""}
+
+Return in clean markdown."""
+                    ans, used = generate_with_retry(client, prompt, model_name)
+                    st.session_state.solver_answer = ans
+                    st.success("Solved!")
+                    st.rerun()
+            except Exception as e:
+                st.error(classify_api_error(e))
+
+with ps_c2:
+    st.markdown("### Solution")
+    if st.session_state.get("solver_answer"):
+        sol = st.session_state.solver_answer
+        st.markdown(sol)
+        st.download_button("📥 Download Solution (TXT)", data=sol, file_name=f"ai_problem_solution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", use_container_width=True)
+        if st.button("🧹 Clear Solution", use_container_width=True):
+            st.session_state.solver_answer = ""
+            st.rerun()
+    else:
+        st.markdown("""
+        <div class="glass-card">
+            <h4>How this works</h4>
+            <ul>
+                <li>Paste any question or upload file</li>
+                <li>Pick subject, goal & level</li>
+                <li>Get step-by-step solution</li>
+                <li>See alternative method & practice questions</li>
+                <li>Perfect for homework, exam prep & self-study</li>
+            </ul>
+            <div class="service-box">
+                <strong>Tip:</strong> For math problems, paste full question with numbers for best results
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
