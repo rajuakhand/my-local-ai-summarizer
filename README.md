@@ -66,10 +66,6 @@ Create a `.streamlit/secrets.toml` file or set environment variable:
 
 ```toml
 # .streamlit/secrets.toml
-GEMINI_API_KEY = "your_google_gemini_api_key_here"
-```
-
-Get your free API key from [Google AI Studio](https://aistudio.google.com/apikey).
 
 ### 5. Run the App
 
