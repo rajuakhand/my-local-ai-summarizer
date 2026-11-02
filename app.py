@@ -122,6 +122,13 @@ DEFAULTS = {
     "last_model": MODELS[0],
     "last_length": "Medium",
     "last_uploaded_file": None,
+    "chat_history": [],
+    "chat_document": "",
+    "chat_last_uploaded": None,
+    "quiz_data": [],
+    "quiz_answers": {},
+    "flashcards": [],
+    "slides_data": [],
 }
 
 for key, value in DEFAULTS.items():
@@ -972,8 +979,303 @@ else:
 
 
 # --------------------------------------------------
-# FAQ & PROFESSIONAL FOOTER (Scribbr Style)
+# CHAT WITH DOCUMENT (Document Q&A)
 # --------------------------------------------------
+
+st.divider()
+st.subheader("💬 Chat with Document")
+st.caption("Ask questions about your uploaded document and get instant answers.")
+
+chat_col1, chat_col2 = st.columns([1, 1], gap="large")
+
+with chat_col1:
+    st.markdown("**Upload Document for Chat**")
+    chat_uploaded_file = st.file_uploader(
+        "Upload TXT or PDF to chat with",
+        type=["txt", "pdf"],
+        key="chat_uploader",
+        help="Upload a document to start chatting with it.",
+    )
+
+    if chat_uploaded_file is not None:
+        if st.session_state.chat_last_uploaded != chat_uploaded_file.name:
+            try:
+                chat_doc_text = extract_uploaded_text(chat_uploaded_file)
+                if chat_doc_text:
+                    st.session_state.chat_document = chat_doc_text
+                    st.session_state.chat_last_uploaded = chat_uploaded_file.name
+                    st.session_state.chat_history = []
+                    st.success(f"Loaded {chat_uploaded_file.name} for chat")
+                    st.rerun()
+                else:
+                    st.warning("No readable text found in this file.")
+            except Exception as error:
+                st.error(f"File processing failed: {error}")
+
+    if st.session_state.chat_document:
+        chat_words = len(st.session_state.chat_document.split())
+        st.metric("Document Size", f"{chat_words:,} words")
+        
+        with st.expander("View Document Preview"):
+            preview = st.session_state.chat_document[:1000]
+            st.text(preview + ("..." if len(st.session_state.chat_document) > 1000 else ""))
+    else:
+        st.info("Upload a document to start chatting.")
+
+with chat_col2:
+    st.markdown("**Chat Interface**")
+    
+    if not st.session_state.chat_document:
+        st.info("Please upload a document first to ask questions.")
+    else:
+        # Display chat history
+        chat_container = st.container()
+        with chat_container:
+            if st.session_state.chat_history:
+                for msg in st.session_state.chat_history:
+                    if msg["role"] == "user":
+                        st.markdown(f"**🧑 You:** {msg['content']}")
+                    else:
+                        st.markdown(f"**🤖 AI:** {msg['content']}")
+                    st.markdown("---")
+            else:
+                st.caption("No messages yet. Ask your first question!")
+        
+        # Question input
+        user_question = st.text_input(
+            "Ask a question about the document:",
+            placeholder="e.g., What are the main conclusions?",
+            key="chat_question",
+        )
+        
+        chat_btn_col1, chat_btn_col2 = st.columns(2)
+        with chat_btn_col1:
+            ask_clicked = st.button("💬 Ask Question", type="primary", use_container_width=True)
+        with chat_btn_col2:
+            clear_chat_clicked = st.button("🗑️ Clear Chat", use_container_width=True)
+        
+        if clear_chat_clicked:
+            st.session_state.chat_history = []
+            st.rerun()
+        
+        if ask_clicked and user_question.strip():
+            api_key = get_api_key()
+            if not api_key:
+                st.error("GEMINI_API_KEY is missing. Add it in Streamlit Settings > Secrets.")
+            else:
+                try:
+                    with st.spinner("🤖 Thinking..."):
+                        client = genai.Client(api_key=api_key)
+                        
+                        chat_prompt = f"""
+You are an expert document analyst. Answer questions based ONLY on the provided document context.
+
+RULES:
+- Answer ONLY using information from the document. Do not use prior knowledge.
+- If the answer is not found in the document, say "I cannot find this information in the document."
+- Be precise and cite specific details when relevant.
+- Keep answers clear and concise.
+
+DOCUMENT CONTEXT:
+{st.session_state.chat_document[:50000]}
+
+QUESTION:
+{user_question}
+
+ANSWER:
+"""
+                        
+                        generated_answer, actual_model = generate_with_retry(
+                            client,
+                            chat_prompt,
+                            model_name,
+                        )
+                        
+                        # Add to history
+                        st.session_state.chat_history.append({
+                            "role": "user",
+                            "content": user_question,
+                            "timestamp": datetime.now().strftime("%H:%M:%S")
+                        })
+                        st.session_state.chat_history.append({
+                            "role": "assistant",
+                            "content": generated_answer,
+                            "timestamp": datetime.now().strftime("%H:%M:%S")
+                        })
+                        
+                        st.rerun()
+                        
+                except Exception as error:
+                    st.error(classify_api_error(error))
+                    with st.expander("Technical error details"):
+                        st.code(str(error))
+        elif ask_clicked and not user_question.strip():
+            st.warning("Please enter a question.")
+
+# --------------------------------------------------
+# AI PRESENTATION MAKER (Slide Generator)
+# --------------------------------------------------
+
+st.divider()
+st.subheader("🎞️ AI Presentation Maker")
+st.caption("Turn your document into professional slides with speaker notes instantly.")
+
+pcol1, pcol2 = st.columns([1, 1], gap="large")
+
+with pcol1:
+    st.markdown("**Presentation Settings**")
+    slide_source = st.radio(
+        "Source Document",
+        ["Use current input document", "Use chat document", "Paste text manually"],
+        key="slide_source"
+    )
+    
+    if slide_source == "Paste text manually":
+        slide_manual_text = st.text_area(
+            "Paste text for presentation",
+            height=200,
+            key="slide_manual"
+        )
+        slide_source_text = slide_manual_text
+    elif slide_source == "Use chat document":
+        slide_source_text = st.session_state.chat_document
+        if slide_source_text:
+            st.info(f"Using chat document ({len(slide_source_text.split()):,} words)")
+        else:
+            st.warning("No chat document uploaded. Upload in Chat section first.")
+    else:
+        slide_source_text = st.session_state.input_text
+        if slide_source_text:
+            st.info(f"Using input document ({len(slide_source_text.split()):,} words)")
+        else:
+            st.warning("No input document available. Upload/paste in Input section first.")
+    
+    slide_count = st.slider("Number of Slides", 5, 12, 8)
+    slide_audience = st.selectbox(
+        "Target Audience",
+        ["Academic/Lecture", "Student Presentation", "Business/Meeting", "Seminar/Conference"],
+        key="slide_audience"
+    )
+    slide_style = st.selectbox(
+        "Presentation Style",
+        ["Concise & Clear", "Detailed with Explanation", "Minimal Bullet Points"],
+        key="slide_style"
+    )
+    
+    gen_slides_btn = st.button("🎞️ Generate Presentation", type="primary", use_container_width=True)
+    
+    if gen_slides_btn:
+        api_key = get_api_key()
+        if not api_key:
+            st.error("GEMINI_API_KEY is missing.")
+        elif not slide_source_text.strip():
+            st.warning("Please provide a document source first.")
+        else:
+            try:
+                with st.spinner("🤖 Creating your presentation slides..."):
+                    import json
+                    client = genai.Client(api_key=api_key)
+                    slide_prompt = f"""
+You are an expert presentation designer. Create a professional {slide_count}-slide presentation from the document.
+
+AUDIENCE: {slide_audience}
+STYLE: {slide_style}
+RULES:
+- Create exactly {slide_count} slides
+- Slide 1 should be Title Slide
+- Include Introduction, Main Content, and Conclusion slides appropriately
+- Each slide must have: slide_number, title, bullets (list of points), speaker_notes
+- Keep bullets concise and impactful
+- Speaker notes should explain what to say during presentation
+- Content must be based ONLY on the document
+- Format as JSON
+
+DOCUMENT:
+{slide_source_text[:45000]}
+
+Return in this exact format:
+[
+  {{
+    "slide_number": 1,
+    "title": "Slide Title",
+    "bullets": ["Point 1", "Point 2", "Point 3"],
+    "speaker_notes": "What to say while presenting this slide..."
+  }}
+]
+"""
+                    resp, model_used = generate_with_retry(client, slide_prompt, model_name)
+                    try:
+                        start = resp.find('[')
+                        end = resp.rfind(']') + 1
+                        json_str = resp[start:end]
+                        slides_data = json.loads(json_str)
+                        st.session_state.slides_data = slides_data
+                        st.session_state.slide_idx = 0
+                        st.success(f"Generated {len(slides_data)} slides!")
+                        st.rerun()
+                    except:
+                        st.error("Failed to parse slides. Please try again.")
+                        st.code(resp)
+            except Exception as error:
+                st.error(classify_api_error(error))
+
+with pcol2:
+    st.markdown("**Slide Preview**")
+    if st.session_state.slides_data:
+        if 'slide_idx' not in st.session_state:
+            st.session_state.slide_idx = 0
+        
+        total_s = len(st.session_state.slides_data)
+        slide = st.session_state.slides_data[st.session_state.slide_idx]
+        
+        st.progress((st.session_state.slide_idx + 1) / total_s)
+        st.caption(f"Slide {slide['slide_number']} of {total_s}")
+        
+        st.markdown(f"""
+        <div style="background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border: 2px solid #6366f1; border-radius: 14px; padding: 30px; min-height: 280px; color: white;">
+            <h2 style="color: #a5b4fc; margin-bottom: 24px; font-size: 1.8rem;">{html.escape(str(slide['title']))}</h2>
+            <ul style="font-size: 1.1rem; line-height: 1.8;">
+        """, unsafe_allow_html=True)
+        
+        for bullet in slide.get('bullets', []):
+            st.markdown(f"<li style='margin-bottom: 10px;'>{html.escape(str(bullet))}</li>", unsafe_allow_html=True)
+        
+        st.markdown("</ul></div>", unsafe_allow_html=True)
+        
+        with st.expander("🎤 Speaker Notes"):
+            st.write(slide.get('speaker_notes', 'No notes available.'))
+        
+        nav_s1, nav_s2, nav_s3 = st.columns(3)
+        with nav_s1:
+            if st.button("⬅️ Previous", use_container_width=True):
+                if st.session_state.slide_idx > 0:
+                    st.session_state.slide_idx -= 1
+                    st.rerun()
+        with nav_s2:
+            pass
+        with nav_s3:
+            if st.button("Next ➡️", use_container_width=True):
+                if st.session_state.slide_idx < total_s - 1:
+                    st.session_state.slide_idx += 1
+                    st.rerun()
+        
+        md_content = f"# Presentation\n\n"
+        for s in st.session_state.slides_data:
+            md_content += f"## Slide {s['slide_number']}: {s['title']}\n\n"
+            for b in s.get('bullets', []):
+                md_content += f"- {b}\n"
+            md_content += f"\n**Speaker Notes:**\n{s.get('speaker_notes', '')}\n\n---\n\n"
+        
+        st.download_button(
+            "📥 Download as Markdown",
+            data=md_content,
+            file_name="ai_presentation.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
+    else:
+        st.info("Generate a presentation first to preview slides here.")
+
 
 st.divider()
 
