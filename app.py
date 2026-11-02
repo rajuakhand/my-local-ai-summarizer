@@ -133,6 +133,7 @@ DEFAULTS = {
     "solver_question": "",
     "solver_answer": "",
     "career_roadmap": "",
+    "wellness_report": "",
 }
 
 for key, value in DEFAULTS.items():
@@ -1687,6 +1688,151 @@ with cr_c2:
             </ul>
             <div class="service-box">
                 <strong>Example:</strong> "Doctor", "CSE Engineer", "Lawyer" etc - works for any field
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.divider()
+
+# --------------------------------------------------
+# AI STUDENT FITNESS, MENTAL & WELLNESS SELF-CHECKER
+# --------------------------------------------------
+
+st.subheader("❤️ AI Student Fitness, Mental & Wellness Self-Checker")
+st.caption("Quick self-check for your physical, mental & overall wellness. Get safe, practical advice tailored for students.")
+
+wl_c1, wl_c2 = st.columns([1, 1], gap="large")
+
+with wl_c1:
+    st.markdown("### 👤 Basic Info")
+    wl_age = st.number_input("Age", min_value=10, max_value=40, value=18)
+    wl_gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+    wl_height = st.number_input("Height (cm)", min_value=120, max_value=210, value=170)
+    wl_weight = st.number_input("Weight (kg)", min_value=35, max_value=150, value=65)
+    
+    try:
+        bmi = wl_weight / ((wl_height/100)**2)
+        if bmi < 18.5:
+            st.info(f"BMI: {bmi:.1f} — Underweight")
+        elif bmi < 25:
+            st.success(f"BMI: {bmi:.1f} — Normal weight")
+        elif bmi < 30:
+            st.warning(f"BMI: {bmi:.1f} — Overweight")
+        else:
+            st.error(f"BMI: {bmi:.1f} — Obese")
+    except:
+        pass
+    
+    st.markdown("### 🏃 Physical Habits")
+    wl_sleep = st.slider("Average Sleep (hours/night)", 3.0, 10.0, 7.0, 0.5)
+    wl_water = st.slider("Water intake (glasses/day)", 1, 12, 6)
+    wl_walk = st.selectbox("Daily Activity", ["Mostly sitting (all day)", "Light walk 1-2 days", "Walk 3-4 days/week", "Active most days", "Very active daily"])
+    wl_meal = st.selectbox("Eating Habits", ["Mostly junk/fast food", "Mixed", "Home cooked mostly", "Balanced & nutritious"])
+    wl_screen = st.slider("Screen time (hours/day)", 1, 14, 7)
+    
+    st.markdown("### 🧠 Mental Wellness")
+    wl_stress = st.select_slider("Stress Level", options=["Low", "Mild", "Moderate", "High", "Very High"])
+    wl_mood = st.select_slider("Overall Mood (last 2 weeks)", options=["Mostly good", "Sometimes low", "Often low", "Frequently anxious/sad", "Very distressed"])
+    wl_focus = st.select_slider("Focus/Concentration", options=["Good", "Slightly affected", "Often distracted", "Hard to focus", "Very poor"])
+    wl_sleep_qual = st.select_slider("Sleep Quality", options=["Restful", "Mostly fine", "Disturbed", "Poor", "Very poor"])
+    wl_social = st.select_slider("Social Connection", options=["Active", "Okay", "Isolated at times", "Mostly alone", "Lonely often"])
+    
+    st.markdown("### ⚠️ Red Flags (Check if any)")
+    wl_headache = st.checkbox("Frequent headaches")
+    wl_chest = st.checkbox("Chest discomfort on exertion")
+    wl_breath = st.checkbox("Shortness of breath unusually")
+    wl_dizzy = st.checkbox("Dizziness/fainting spells")
+    wl_anxiety = st.checkbox("Panic-like symptoms")
+    wl_insomnia = st.checkbox("Severe insomnia")
+    
+    wl_check = st.button("🩺 Get Wellness Report", type="primary", use_container_width=True)
+    
+    if wl_check:
+        api_key = get_api_key()
+        if not api_key:
+            st.error("GEMINI_API_KEY missing.")
+        else:
+            try:
+                with st.spinner("Analyzing your fitness & mental wellness..."):
+                    red = []
+                    if wl_headache: red.append("Frequent headaches")
+                    if wl_chest: red.append("Chest discomfort on exertion")
+                    if wl_breath: red.append("Shortness of breath unusually")
+                    if wl_dizzy: red.append("Dizziness/fainting spells")
+                    if wl_anxiety: red.append("Panic-like symptoms")
+                    if wl_insomnia: red.append("Severe insomnia")
+                    
+                    client = genai.Client(api_key=api_key)
+                    prompt = f"""You are a student wellness advisor. Give safe, practical advice. DO NOT diagnose disease. Recommend doctor if serious.
+
+BASIC: Age {wl_age}, Gender {wl_gender}, Height {wl_height}cm, Weight {wl_weight}kg, BMI ~{bmi:.1f}
+PHYSICAL: Sleep {wl_sleep}h, Water {wl_water} glasses, Activity {wl_walk}, Meals {wl_meal}, Screen {wl_screen}h
+MENTAL: Stress {wl_stress}, Mood {wl_mood}, Focus {wl_focus}, Sleep Quality {wl_sleep_qual}, Social {wl_social}
+RED FLAGS: {', '.join(red) if red else 'None'}
+
+Give report in this format:
+
+## OVERALL WELLNESS SCORE
+Physical /100 + Mental /100 + Overall /100 with short verdict
+
+## PHYSICAL FITNESS ASSESSMENT
+Strengths + Areas to improve
+
+## MENTAL WELLNESS ASSESSMENT
+Observations + gentle advice
+
+## BMI & BODY AWARENESS
+Simple explanation
+
+## HOME WORKOUT PLAN (10-15 MIN)
+Easy exercises for beginners (no gym needed)
+
+## YOGA & BREATHING (FOR STUDENTS)
+Simple asanas + pranayama (5-10 min)
+
+## DAILY ROUTINE SUGGESTION
+Wake up to sleep realistic plan
+
+## WHEN TO SEE A DOCTOR
+Clear list based on red flags
+
+## 7-DAY ACTION PLAN
+Day1 to Day7 specific tasks
+
+## SAFETY DISCLAIMER
+Must say: This is for awareness only, not a substitute for professional medical advice. Seek doctor for serious/red flag symptoms.
+
+Keep advice student-friendly, affordable, realistic in hostel/home."""
+                    res, used = generate_with_retry(client, prompt, model_name)
+                    st.session_state.wellness_report = res
+                    st.success("Report ready!")
+                    st.rerun()
+            except Exception as e:
+                st.error(classify_api_error(e))
+
+with wl_c2:
+    st.markdown("### Your Wellness Report")
+    if st.session_state.get("wellness_report"):
+        wr = st.session_state.wellness_report
+        st.markdown(wr)
+        st.download_button("📥 Download Report (TXT)", data=wr, file_name=f"Student_Wellness_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", use_container_width=True)
+        if st.button("🔄 Check Again", use_container_width=True):
+            st.session_state.wellness_report = ""
+            st.rerun()
+    else:
+        st.markdown("""
+        <div class="glass-card">
+            <h4>Check Yourself in 2 Minutes</h4>
+            <ul>
+                <li>⚖️ BMI & Physical Fitness</li>
+                <li>🧠 Stress, Mood & Focus Check</li>
+                <li>🏠 Home Workout (No Equipment)</li>
+                <li>🧘 Yoga & Breathing Exercises</li>
+                <li>🚨 Doctor Alert for Warning Signs</li>
+                <li>📅 7-Day Practical Action Plan</li>
+            </ul>
+            <div class="service-box">
+                <strong>Note:</strong> For awareness only. Not medical diagnosis.
             </div>
         </div>
         """, unsafe_allow_html=True)
