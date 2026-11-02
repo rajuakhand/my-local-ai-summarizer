@@ -132,6 +132,7 @@ DEFAULTS = {
     "ats_report": "",
     "solver_question": "",
     "solver_answer": "",
+    "career_roadmap": "",
 }
 
 for key, value in DEFAULTS.items():
@@ -1548,6 +1549,144 @@ with ps_c2:
             </ul>
             <div class="service-box">
                 <strong>Tip:</strong> For math problems, paste full question with numbers for best results
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.divider()
+
+# --------------------------------------------------
+# AI CAREER ROADMAP GENERATOR (FROM ZERO TO GOAL)
+# --------------------------------------------------
+
+st.subheader("🗺️ AI Career Roadmap Generator (From Zero to Goal)")
+st.caption("Get a complete A to Z roadmap for any career - books, timeline, skills, internships, jobs & more.")
+
+cr_c1, cr_c2 = st.columns([1, 1], gap="large")
+
+with cr_c1:
+    st.markdown("### Your Goal")
+    career_list = ["Doctor (MBBS/Medical)", "Engineer (CSE)", "Engineer (Civil)", "Engineer (EEE/Mechanical)", "Lawyer (LLB)", "Chartered Accountant (CA)", "Data Scientist/AI", "Business/Entrepreneurship", "Pilot", "Nurse/Pharmacy", "Banking/Finance", "Government Job (BCS/PSC)", "Freelancer/Remote Work", "Other (Custom)"]
+    career_sel = st.selectbox("Select Career Goal", career_list, key="career_sel")
+    
+    if career_sel == "Other (Custom)":
+        career_custom = st.text_input("Enter your desired career", placeholder="e.g. UX Designer, Cybersecurity, Architecture", key="career_cust")
+        target_career = career_custom
+    else:
+        target_career = career_sel
+    
+    st.markdown("### Your Current Situation")
+    cr_level = st.selectbox("Current Status", ["Class 9-10", "HSC/A-Level", "After HSC", "Undergraduate Student", "Graduate/Job Holder", "Complete Beginner (Zero Knowledge)"], key="cr_level")
+    cr_time = st.selectbox("Time Available Daily", ["30-60 min", "1-2 hours", "2-3 hours", "3-4 hours", "4-6 hours", "Full Time Focused"], key="cr_time")
+    cr_goal_time = st.selectbox("Target Timeline", ["1 Year", "2 Years", "3 Years", "4-5 Years", "As Fast as Possible", "Flexible"], key="cr_goal_t")
+    cr_country = st.text_input("Country/Location (optional)", placeholder="e.g. Bangladesh, India, Pakistan, USA", key="cr_country")
+    
+    cr_gen = st.button("🗺️ Generate Full Roadmap", type="primary", use_container_width=True)
+    
+    if cr_gen:
+        api_key = get_api_key()
+        if not api_key:
+            st.error("GEMINI_API_KEY missing.")
+        elif not target_career.strip():
+            st.warning("Enter/select a career goal.")
+        else:
+            try:
+                with st.spinner("Creating your complete A to Z roadmap..."):
+                    client = genai.Client(api_key=api_key)
+                    prompt = f"""You are a practical career coach who creates realistic, actionable roadmaps for students starting from zero.
+
+CREATE A COMPLETE A TO Z ROADMAP FOR: {target_career}
+CURRENT STATUS: {cr_level}
+DAILY TIME: {cr_time}
+TARGET TIMELINE: {cr_goal_time}
+LOCATION: {cr_country or 'General'}
+
+Make it brutally practical and realistic. Cover EVERYTHING a student needs.
+
+Structure with these exact sections:
+
+# COMPLETE ROADMAP: FROM ZERO TO {target_career.upper()}
+
+## 1) OVERVIEW
+Quick summary of this career, demand, scope, realistic outlook
+
+## 2) MINDSET & FIRST STEPS (WEEK 1)
+What to do immediately
+
+## 3) PHASE WISE ROADMAP
+Break into Phase 1, Phase 2, Phase 3... with timeline, goals, tasks
+
+## 4) BOOKS & RESOURCES
+Must read books (name + free alternatives), websites, YouTube channels, apps
+
+## 5) SKILLS TO LEARN
+Core skills + Extra/High-value skills with order to learn
+
+## 6) EXAM/ADMISSION GUIDE
+Entrance exams, eligibility, preparation strategy if applicable
+
+## 7) PRACTICAL PROJECTS
+Projects to build portfolio step by step
+
+## 8) INTERNSHIP GUIDE
+When to start, where to find, how to apply, what to learn
+
+## 9) NETWORKING & LINKEDIN
+How to build profile, connect, get opportunities
+
+## 10) JOB SEARCH STRATEGY (AFTER GRADUATION)
+CV/Resume, apply strategy, interview prep, where to apply
+
+## 11) MONTHLY/WEEKLY TIME PLAN
+Realistic daily split based on {cr_time}
+
+## 12) COST ESTIMATE
+Free vs paid (realistic)
+
+## 13) SALARY REALITY
+Entry level to experienced range (realistic for market)
+
+## 14) COMMON MISTAKES TO AVOID
+Must know
+
+## 15) 90-DAY ACTION PLAN
+Exact actions for first 90 days
+
+Be country-aware if location given. Prioritize FREE resources. Focus on practical over theory.
+"""
+                    res, used = generate_with_retry(client, prompt, model_name)
+                    st.session_state.career_roadmap = res
+                    st.success("Roadmap generated!")
+                    st.rerun()
+            except Exception as e:
+                st.error(classify_api_error(e))
+
+with cr_c2:
+    st.markdown("### Your Roadmap")
+    if st.session_state.get("career_roadmap"):
+        rm = st.session_state.career_roadmap
+        st.markdown(rm)
+        st.download_button("📥 Download Full Roadmap (TXT)", data=rm, file_name=f"Career_Roadmap_{target_career.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.txt", use_container_width=True)
+        if st.button("🔄 Generate New Roadmap", use_container_width=True):
+            st.session_state.career_roadmap = ""
+            st.rerun()
+    else:
+        st.markdown("""
+        <div class="glass-card">
+            <h4>From Zero to Goal in One Click</h4>
+            <p>Get a complete roadmap covering:</p>
+            <ul>
+                <li>📚 Books to read & free resources</li>
+                <li>⏰ Hourly/Daily study plan</li>
+                <li>🛠️ Skills to master step by step</li>
+                <li>💼 Internships, networking & LinkedIn</li>
+                <li>🎯 Exam/admission guide</li>
+                <li>🚀 Job search after completion</li>
+                <li>💰 Realistic salary info</li>
+                <li>⚡ First 90-Day Action Plan</li>
+            </ul>
+            <div class="service-box">
+                <strong>Example:</strong> "Doctor", "CSE Engineer", "Lawyer" etc - works for any field
             </div>
         </div>
         """, unsafe_allow_html=True)
