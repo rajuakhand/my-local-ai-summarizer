@@ -1,87 +1,119 @@
-# 🤖 Local AI Text Summarizer
+# 🚀 AI StudySuite Pro
 
-An AI-powered text summarization web app built with Python, Streamlit, LangChain, and Ollama.
+**Your All-in-One AI-Powered Academic & Career Companion**
 
-**Turn long text into concise, easy-to-understand summaries.**
+AI StudySuite Pro is a powerful, feature-rich Streamlit web app that combines document summarization, learning tools, career guidance, wellness tracking, and environmental awareness - all powered by Google Gemini AI.
 
-[🚀 Live Demo](https://my-local-ai-summarizer-cetbdvs2ozk2mnvubxzeyj.streamlit.app/) · [💻 Source Code](https://github.com/rajuakhand/my-local-ai-summarizer)
+[![GitHub stars](https://img.shields.io/github/stars/rajuakhand/my-local-ai-summarizer?style=for-the-badge)](https://github.com/rajuakhand/my-local-ai-summarizer/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/rajuakhand/my-local-ai-summarizer?style=for-the-badge)](https://github.com/rajuakhand/my-local-ai-summarizer/network/members)
+[![GitHub license](https://img.shields.io/github/license/rajuakhand/my-local-ai-summarizer?style=for-the-badge)](https://github.com/rajuakhand/my-local-ai-summarizer/blob/master/LICENSE)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-Live%20Demo-FF4B4B?style=for-the-badge&logo=streamlit)](https://my-local-ai-summarizer-cetbdvs2ozk2mnvubxzeyj.streamlit.app/)
 
 ## ✨ Features
 
-- Summarize long text using an AI language model
-- Simple and interactive Streamlit interface
-- Built with Python and LangChain
-- Uses Ollama for local language-model inference
-- Easy to run and extend
+### 📄 Core Tools
+- **AI Research & Text Summarizer** - Summarize long documents, PDFs & text in 20+ languages with multiple styles
+- **Chat with Document (Q&A)** - Upload any PDF/TXT and have intelligent conversations with it
+- **PDF/TXT Support** - Seamlessly upload and process academic documents
+
+### 🎓 Learning & Study Tools
+- **AI Quiz Generator** - Auto-generate MCQs from any document with difficulty levels
+- **Flashcard Generator** - Create interactive flashcards for effective learning
+- **AI Presentation Maker** - Turn documents into professional slides with speaker notes
+- **AI Problem Solver & Smart Tutor** - Step-by-step solutions for Math, Physics, Chemistry & more
+
+### 💼 Career & Professional
+- **AI Career Roadmap Generator** - Complete A-Z guide from zero to your dream career (Books, Skills, Internships, Jobs)
+- **AI ATS Resume vs Job Description Matcher** - Get ATS score, keyword gaps, and actionable improvements
+
+### ❤️ Wellness & Sustainability
+- **AI Student Fitness, Mental & Wellness Self-Checker** - BMI, stress check, home workouts, yoga & 7-day plan
+- **AI Student Daily Environmental Footprint Tracker** - Track CO₂e from daily activities with real, research-based calculations
 
 ## 🛠️ Tech Stack
 
-- Python
-- Streamlit
-- LangChain
-- Ollama
-- Llama 3.2 (1B)
+- **Frontend:** [Streamlit](https://streamlit.io/)
+- **AI Model:** [Google Gemini 2.5/Flash](https://ai.google.dev/)
+- **PDF Processing:** [pypdf](https://pypdf.readthedocs.io/)
+- **PDF Export:** [reportlab](https://www.reportlab.com/)
+- **Language:** Python 3.10+
 
-## 🚀 Run Locally
+## 🚀 Quick Start
 
-Clone the repository:
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/rajuakhand/my-local-ai-summarizer.git
 cd my-local-ai-summarizer
 ```
 
-Create and activate a virtual environment:
+### 2. Create Virtual Environment
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-Install dependencies:
+### 3. Install Dependencies
 
 ```bash
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-Make sure Ollama is installed and running, then download the model:
+### 4. Set Up API Key
 
-```bash
-ollama pull llama3.2:1b
+Create a `.streamlit/secrets.toml` file or set environment variable:
+
+```toml
+# .streamlit/secrets.toml
+GEMINI_API_KEY = "your_google_gemini_api_key_here"
 ```
 
-Start the application:
+Get your free API key from [Google AI Studio](https://aistudio.google.com/apikey).
+
+### 5. Run the App
 
 ```bash
-python -m streamlit run app.py
+streamlit run app.py
 ```
 
 Open `http://localhost:8501` in your browser.
-## 📸 Application Screenshot
-
-![Local AI Text Summarizer](screenshots/app-demo.png)
-
-Try the live application: [Open AI Summarizer](https://my-local-ai-summarizer-cetbdvs2ozk2mnvubxzeyj.streamlit.app/)
 
 ## 🌐 Live Demo
 
-Try the deployed application:
+Check out the live app: [**AI StudySuite Pro Live Demo**](https://my-local-ai-summarizer-cetbdvs2ozk2mnvubxzeyj.streamlit.app/)
 
-https://my-local-ai-summarizer-cetbdvs2ozk2mnvubxzeyj.streamlit.app/
+## 📸 Screenshots
 
-## 🗺️ Roadmap
+*Coming soon* - All features are live in the deployed app!
 
-- [ ] Add a one-click Copy Summary button
-- [ ] Improve the UI and responsive layout
-- [ ] Add Bengali and English language options
-- [ ] Add sample text and word-count statistics
-- [ ] Improve error handling and documentation
+## 🤝 Contributing
 
-## 👨‍💻 About
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit pull requests.
 
-This project demonstrates practical skills in Python, LLM integration, prompt engineering, and web app development.
+## 📄 License
 
-If you find this project useful, consider giving the repository a ⭐.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
+## ⚠️ Disclaimer
 
-This project is open source. A license can be added when one is chosen.
+- This app uses AI models for educational and informational purposes only
+- Wellness & health advice is for awareness only - not a substitute for professional medical advice
+- Environmental calculations are research-aligned estimates for educational awareness
+- Always consult qualified professionals for medical, career, or legal decisions
+
+## 👨‍💻 Author
+
+**[rajuakhand](https://github.com/rajuakhand)**
+
+If you find this project useful, please consider giving it a ⭐ star on GitHub!
+
+## 💡 Roadmap
+
+- [ ] Add more language support
+- [ ] Export reports as PDF
+- [ ] Add dark/light theme toggle
+- [ ] Mobile responsive improvements
+- [ ] Add user authentication
+
+**Made with ❤️ for Students Worldwide**
