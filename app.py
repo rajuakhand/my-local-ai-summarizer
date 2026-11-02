@@ -129,6 +129,7 @@ DEFAULTS = {
     "quiz_answers": {},
     "flashcards": [],
     "slides_data": [],
+    "ats_report": "",
 }
 
 for key, value in DEFAULTS.items():
