@@ -8,6 +8,7 @@ from datetime import datetime
 import streamlit as st
 from google import genai
 from google.genai import types
+import yaml
 
 try:
     from pypdf import PdfReader
@@ -16,7 +17,7 @@ except ImportError:
 
 try:
     from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.platypus import (
         SimpleDocTemplate,
         Paragraph,
@@ -26,6 +27,7 @@ try:
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
     from reportlab.lib import colors
+    from reportlab.lib.units import inch
 
     PDF_EXPORT_AVAILABLE = True
 except ImportError:
@@ -37,10 +39,206 @@ except ImportError:
 # --------------------------------------------------
 
 st.set_page_config(
-    page_title="AI Research & Text Summarizer Pro",
-    page_icon="🎓",
+    page_title="AI StudySuite Pro - All-in-One Academic & Career Companion",
+    page_icon="🚀",
     layout="wide",
     initial_sidebar_state="expanded",
+)
+
+
+# --------------------------------------------------
+# THEME & PROFESSIONAL CANVA-STYLE DESIGN
+# --------------------------------------------------
+
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
+
+with st.sidebar:
+    st.markdown("### 🎨 Appearance")
+    theme_choice = st.toggle("🌙 Dark Mode", value=(st.session_state.theme == "dark"))
+    if theme_choice:
+        st.session_state.theme = "dark"
+    else:
+        st.session_state.theme = "light"
+
+if st.session_state.theme == "dark":
+    bg_color = "#0f1026"
+    card_bg = "linear-gradient(145deg, rgba(30,32,65,0.95) 0%, rgba(15,16,38,0.95) 100%)"
+    text_color = "#f8fafc"
+    subtext = "#cbd5e1"
+    border = "1px solid rgba(139,92,246,0.35)"
+    accent = "#8b5cf6"
+else:
+    bg_color = "#f8fafc"
+    card_bg = "linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%)"
+    text_color = "#0f172a"
+    subtext = "#475569"
+    border = "1px solid rgba(99,102,241,0.25)"
+    accent = "#6366f1"
+
+st.markdown(
+    f"""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    * {{
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }}
+    
+    .stApp {{
+        background: radial-gradient(1200px 800px at 80% -10%, rgba(139,92,246,0.12), transparent), {bg_color};
+        color: {text_color};
+    }}
+    
+    .main .block-container {{
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        max-width: 1400px;
+    }}
+    
+    .hero-container {{
+        background: linear-gradient(135deg, {accent} 0%, #4f46e5 50%, #312e81 100%);
+        border-radius: 20px;
+        padding: 48px 32px;
+        text-align: center;
+        margin-bottom: 32px;
+        box-shadow: 0 40px 80px -40px rgba(99,102,241,0.8);
+        position: relative;
+        overflow: hidden;
+    }}
+    
+    .hero-container::before {{
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    }}
+    
+    .hero-container h1 {{
+        font-size: clamp(2.2rem, 5vw, 3.8rem);
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
+        position: relative;
+        z-index: 1;
+    }}
+    
+    .hero-container p {{
+        color: rgba(255,255,255,0.9);
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        max-width: 800px;
+        margin: 0 auto 20px auto;
+        position: relative;
+        z-index: 1;
+    }}
+    
+    .trust-badges {{
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+    }}
+    
+    .trust-badge-item {{
+        background: rgba(255,255,255,0.18);
+        backdrop-filter: blur(10px);
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.3);
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }}
+    
+    .glass-card {{
+        background: {card_bg};
+        border: {border};
+        border-radius: 18px;
+        padding: 28px;
+        margin-bottom: 20px;
+        box-shadow: 0 30px 60px -40px rgba(99,102,241,0.9);
+        backdrop-filter: blur(16px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }}
+    
+    .glass-card:hover {{
+        transform: translateY(-4px);
+        box-shadow: 0 40px 70px -40px rgba(139,92,246,1);
+    }}
+    
+    .service-box {{
+        background: linear-gradient(90deg, rgba(139,92,246,0.18) 0%, transparent 100%);
+        border-left: 4px solid {accent};
+        padding: 16px 22px;
+        border-radius: 0 14px 14px 0;
+        margin: 16px 0;
+        color: {text_color};
+    }}
+    
+    .stButton > button {{
+        background: linear-gradient(135deg, {accent} 0%, #4f46e5 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 0.6rem 1.6rem;
+        box-shadow: 0 20px 40px -20px rgba(99,102,241,0.9);
+        transition: all 0.25s ease;
+    }}
+    
+    .stButton > button:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 25px 50px -20px rgba(139,92,246,1);
+    }}
+    
+    .stDownloadButton > button {{
+        background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+    }}
+    
+    [data-testid="stMetric"] {{
+        background: {card_bg};
+        border: {border};
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 25px 50px -40px rgba(99,102,241,0.9);
+    }}
+    
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 12px;
+    }}
+    
+    .stTabs [data-baseweb="tab"] {{
+        border-radius: 999px;
+        padding: 10px 24px;
+        background: transparent;
+    }}
+    
+    .stTabs [aria-selected="true"] {{
+        background: linear-gradient(135deg, {accent} 0%, #4f46e5 100%);
+        color: white;
+    }}
+    
+    footer {{visibility: hidden;}}
+    
+    @media (max-width: 768px) {{
+        .hero-container {{ padding: 32px 20px; }}
+        .glass-card {{ padding: 20px; }}
+        .trust-badges {{ flex-direction: column; align-items: center; }}
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 
@@ -497,16 +695,15 @@ def make_pdf(text):
 st.markdown(
     """
     <div class="hero-container">
-        <h1>🎓 AI Research & Text Summarizer Pro</h1>
+        <h1>🚀 AI StudySuite Pro</h1>
         <p>
-            Submit your work with confidence. Generate precise, multi-lingual academic summaries, 
-            key takeaways, and structural insights powered by Google Gemini AI.
+            All-in-One AI-Powered Academic, Career, Wellness & Sustainability Companion
         </p>
         <div class="trust-badges">
-            <span class="trust-badge-item">🔒 100% Academic Integrity</span>
-            <span class="trust-badge-item">⚡ Instant 1-Click Processing</span>
-            <span class="trust-badge-item">🌍 20+ Languages Supported</span>
-            <span class="trust-badge-item">⭐ Enterprise Gemini AI</span>
+            <span class="trust-badge-item">✨ Canva-Style Professional UI</span>
+            <span class="trust-badge-item">🤖 Powered by Google Gemini AI</span>
+            <span class="trust-badge-item">🎓 Built for Students Worldwide</span>
+            <span class="trust-badge-item">🌱 Learn • Plan • Grow • Thrive</span>
         </div>
     </div>
     """,
@@ -1996,11 +2193,11 @@ st.markdown(
     <div style="
         text-align: center;
         color: #94a3b8;
-        padding: 24px 12px 12px 12px;
+        padding: 32px 12px 16px 12px;
         font-size: 0.9rem;
     ">
-        <strong>AI Text Summarizer Pro | Academic Edition</strong><br>
-        Built with Python, Streamlit, and Google Gemini API &nbsp;|&nbsp; Committed to Academic Excellence
+        <strong>🚀 AI StudySuite Pro</strong> | All-in-One Academic, Career, Wellness & Sustainability Companion<br>
+        Built with Python, Streamlit & Google Gemini AI • MIT Licensed • <a href="https://github.com/rajuakhand/my-local-ai-summarizer" style="color:#a5b4fc;">GitHub</a>
     </div>
     """,
     unsafe_allow_html=True,

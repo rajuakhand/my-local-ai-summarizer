@@ -2,3 +2,6 @@ streamlit
 google-genai
 pypdf
 reportlab
+streamlit-authenticator
+PyYAML
+bcrypt

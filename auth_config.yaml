@@ -1,0 +1,13 @@
+credentials:
+  usernames:
+    student:
+      email: student@aistudysuite.pro
+      name: Student User
+      password: $2b$12$KIXx9Z7VJbQGqKjQJ5X0eO3v5KjQJ5X0eO3v5KjQJ5X0eO3v5KjQ
+cookie:
+  expiry_days: 30
+  key: aistudysuite_pro_secret_key_2026
+  name: aistudysuite_auth
+preauthorized:
+  emails:
+  - student@aistudysuite.pro
